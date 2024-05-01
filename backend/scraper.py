@@ -20,16 +20,19 @@ async def search(query):
             soup = BeautifulSoup(content, "html.parser")
             links = soup.find_all("a", href=True)
             tasks = []
+            existing_links = set()
             for link in links:
                 if "/music/" in link["href"]:
                     song_link = link["href"]
-                    task = asyncio.ensure_future(fetch_song_data(session, song_link))
-                    tasks.append(task)
+                    if song_link not in existing_links:
+                        existing_links.add(song_link)
+                        task = asyncio.ensure_future(fetch_song_data(session, song_link))
+                        tasks.append(task)
             return await asyncio.gather(*tasks)
 
 async def main():
     result = await search("tum")
-    print(result)
+    # print(result)
 
 if __name__ == "__main__":
     asyncio.run(main())
